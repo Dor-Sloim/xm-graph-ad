@@ -3,10 +3,14 @@ import ForceGraph2D from 'react-force-graph-2d';
 import * as d3 from 'd3';
 import SearchBar from './SearchBar';
 import UserInfo from './UserInfo';
+import NestedMembers from './NestedMembers';
+import { ReactSearchAutocomplete } from 'react-search-autocomplete';
+
 
 const CyberGraph = ({ data }) => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeInfo, setNodeInfo] = useState(null);
+  const [members, setNodeNestedMembers] = useState(null);
   const [isGroupMode, setIsGroupMode] = useState(false);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
   const fgRef = useRef();
@@ -18,6 +22,41 @@ const CyberGraph = ({ data }) => {
       setIsButtonClicked(false);
     }, 500); // Match this with the animation duration
   };
+
+  const ResolveGroupMembers = (node, group_path=[]) => {
+    if(!node) {
+      return 
+    }
+    const path = group_path.slice();
+
+      const groups = data.links
+        .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
+        .map(link => {
+          const userId = typeof link.target === 'string' ? link.target : link.target.id;
+          return data.nodes.find(n => n.id === userId && n.type === 'group');
+        })
+        .filter(Boolean);
+
+      const users = data.links
+        .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
+        .map(link => {
+          const userId = typeof link.target === 'string' ? link.target : link.target.id;
+          return data.nodes.find(n => n.id === userId && n.type === 'user');
+        })
+        .filter(Boolean);
+
+      for (let i = 0; groups.length > i; i++) {
+        if (group_path.includes(groups[i])) {
+          continue;
+        }
+        group_path.push(groups[i]);
+        groups[i].members = ResolveGroupMembers(groups[i], group_path.slice());
+      }
+
+      const result = {users: users, groups: groups, path: path}
+
+      return result 
+  }
 
   const graphData = useMemo(() => {
     if (isGroupMode) {
@@ -45,24 +84,11 @@ const CyberGraph = ({ data }) => {
 
   const handleNodeSelect = (node) => {
     setSelectedNode(node);
-    if (node.type === 'user') {
-      const groups = data.links
-        .filter(link => link.target === node.id || (typeof link.target === 'object' && link.target.id === node.id))
-        .map(link => {
-          const groupId = typeof link.source === 'string' ? link.source : link.source.id;
-          return data.nodes.find(n => n.id === groupId && n.type === 'group');
-        })
-        .filter(Boolean);
-      setNodeInfo({ user: node, groups });
-    } else if (node.type === 'group') {
-      const users = data.links
-        .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
-        .map(link => {
-          const userId = typeof link.target === 'string' ? link.target : link.target.id;
-          return data.nodes.find(n => n.id === userId && n.type === 'user');
-        })
-        .filter(Boolean);
-      setNodeInfo({ group: node, users });
+    if (node.type === "user") {
+      return
+    }
+    if (node.type === "group") {
+      setNodeNestedMembers(ResolveGroupMembers(node))
     }
   };
 
@@ -135,7 +161,12 @@ const CyberGraph = ({ data }) => {
         d3VelocityDecay={0.3}
         onNodeClick={handleNodeSelect}
       />
+      {members && 
+        <NestedMembers props={ {selectedNode, members} } />
+        }
+      {/*
       {nodeInfo && <UserInfo nodeInfo={nodeInfo} />}
+      */}
     </div>
   );
 };
