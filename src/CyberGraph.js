@@ -161,7 +161,7 @@ const CyberGraph = ({ data }) => {
         d3VelocityDecay={0.3}
         onNodeClick={handleNodeSelect}
       />
-      {members && 
+      {members && selectedNode &&
         <NestedMembers props={ {selectedNode, members} } />
         }
       {/*
