@@ -66,6 +66,8 @@ const generateMockData = () => {
     { source: 'g1', target: 'u5' },
     // L3 nested
     { source: 'g5', target: 'g4' },
+    // With loop
+    { source: 'g4', target: 'g5' },
   ];
 
   // Calculate user counts for each group

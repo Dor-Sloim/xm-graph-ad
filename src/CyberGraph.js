@@ -23,39 +23,39 @@ const CyberGraph = ({ data }) => {
     }, 500); // Match this with the animation duration
   };
 
+  const GetDirectMembers = (node, type) => {
+    const members = data.links
+      .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
+      .map(link => {
+        const userId = typeof link.target === 'string' ? link.target : link.target.id;
+        return data.nodes.find(n => n.id === userId && n.type === type);
+      })
+      .filter(Boolean);
+    
+    return members
+  }
+
   const ResolveGroupMembers = (node, group_path=[]) => {
     if(!node) {
       return 
     }
+
     const path = group_path.slice();
+    const groups = GetDirectMembers(node, 'group').slice()
+    const users = GetDirectMembers(node, 'user')
 
-      const groups = data.links
-        .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
-        .map(link => {
-          const userId = typeof link.target === 'string' ? link.target : link.target.id;
-          return data.nodes.find(n => n.id === userId && n.type === 'group');
-        })
-        .filter(Boolean);
-
-      const users = data.links
-        .filter(link => link.source === node.id || (typeof link.source === 'object' && link.source.id === node.id))
-        .map(link => {
-          const userId = typeof link.target === 'string' ? link.target : link.target.id;
-          return data.nodes.find(n => n.id === userId && n.type === 'user');
-        })
-        .filter(Boolean);
-
-      for (let i = 0; groups.length > i; i++) {
-        if (group_path.includes(groups[i])) {
-          continue;
-        }
-        group_path.push(groups[i]);
-        groups[i].members = ResolveGroupMembers(groups[i], group_path.slice());
+    for (let i = 0; groups.length > i; i++) {
+      // avoid loops
+      if (group_path.includes(groups[i])) {
+        continue;
       }
+      group_path.push(groups[i]);
+      groups[i].members = ResolveGroupMembers(groups[i], group_path.slice());
+    }
 
-      const result = {users: users, groups: groups, path: path}
+    const result = {users: users, groups: groups, path: path}
 
-      return result 
+    return result 
   }
 
   const graphData = useMemo(() => {

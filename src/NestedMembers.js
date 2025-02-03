@@ -47,7 +47,7 @@ const GroupRow = ({ props }) => {
               <TableCell><b>Name</b></TableCell>
               <TableCell align="right"><b>Id</b></TableCell>
               <TableCell align="right"><b>Type</b></TableCell>
-              <TableCell align="right"><b>Member Count</b></TableCell>
+              <TableCell align="right"><b>Direct Members</b></TableCell>
             </TableRow>
           </TableHead>
             <Rows props={{members : props.member.members}} />
@@ -104,7 +104,7 @@ const NestedMembers = ({ props }) => {
               <TableCell><b>Name</b></TableCell>
               <TableCell align="right"><b>Id</b></TableCell>
               <TableCell align="right"><b>Type</b></TableCell>
-              <TableCell align="right"><b>Member Count</b></TableCell>
+              <TableCell align="right"><b>Direct Members</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
