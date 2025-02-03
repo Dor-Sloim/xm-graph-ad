@@ -28,6 +28,8 @@ const generateMockData = () => {
     { id: 'g8', name: 'R&D', type: 'group' },
     { id: 'g9', name: 'Customer Support', type: 'group' },
     { id: 'g10', name: 'Legal', type: 'group' },
+    // empty group
+    { id: 'g11', name: 'noOne', type: 'group' },
   ];
 
   const links = [
@@ -35,6 +37,7 @@ const generateMockData = () => {
     { source: 'g1', target: 'g3' },
     { source: 'g1', target: 'g4' },
     { source: 'g1', target: 'g5' },
+    { source: 'g1', target: 'g11' },
     { source: 'g2', target: 'u1' },
     { source: 'g2', target: 'u2' },
     { source: 'g3', target: 'u3' },
@@ -61,6 +64,10 @@ const generateMockData = () => {
     { source: 'g9', target: 'u4' },
     { source: 'g10', target: 'u5' },
     { source: 'g1', target: 'u5' },
+    // L3 nested
+    { source: 'g5', target: 'g4' },
+    // With loop
+    { source: 'g4', target: 'g5' },
   ];
 
   // Calculate user counts for each group
